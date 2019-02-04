@@ -41,7 +41,7 @@ export class Verify extends Plugin implements IModule<Verify> {
 		if (config == null) {
 			config = <IConfigDatabase> { tableName: DEFAULT_TABLE_NAME };
 
-			cfg.saveInstant<IConfigDatabase>(i, <Required<IConfigDatabase>> config, CONFIG_PROPS);
+			await cfg.saveInstant<IConfigDatabase>(i, <Required<IConfigDatabase>> config, CONFIG_PROPS);
 
 			log("info", `No database config was in place, new one has been created. Uses table name ${config.tableName}`);
 		}
