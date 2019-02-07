@@ -1,7 +1,7 @@
 import * as getLogger from "loggy";
 import { getDB } from "@utils/db";
 import { INullableHashMap } from "@sb-types/Types";
-import { GuildMember, GuildMemberRoleStore } from "discord.js";
+import { GuildMember } from "discord.js";
 import { EventEmitter } from "events";
 
 export const DEFAULT_TABLE_NAME = "verify";
