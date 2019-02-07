@@ -48,7 +48,11 @@ export class Verify extends Plugin implements IModule<Verify> {
 
 		if (config.tableName == null) throw new Error("Table name must be provided in the config");
 
-		this[DB_CONTROLLER] = new VerifyDBController(config.tableName);
+		const dbController = new VerifyDBController(config.tableName);
+
+		this[DB_CONTROLLER] = dbController;
+
+		await dbController.init();
 	}
 
 	public isEnabled() {
@@ -108,6 +112,33 @@ export class Verify extends Plugin implements IModule<Verify> {
 		} catch (err) {
 			this._errorHasOccured("in attempt to purge verification level", member, err);
 		}
+	}
+
+	/**
+	 * Adds an listener to the DBController event that fires once
+	 * member has been verified on any of the servers
+	 * @param callback Callback to call once member has been verified
+	 * @returns Function to remove event listener
+	 */
+	public onVerified(callback: (member: GuildMember, level: VerificationLevel) => void) {
+		this[DB_CONTROLLER].on("verified", callback);
+
+		return () => {
+			this[DB_CONTROLLER].removeListener("verified", callback);
+		};
+	}
+
+	/**
+	 * Adds a listener to the DBController event that fires once
+	 * member has been purged verified status on any of the servers
+	 * @param callback Function to call once member has been purged
+	 */
+	public onPurged(callback: (member: GuildMember) => void) {
+		this[DB_CONTROLLER].on("purged", callback);
+
+		return () => {
+			this[DB_CONTROLLER].removeListener("purged", callback);
+		};
 	}
 
 	/**

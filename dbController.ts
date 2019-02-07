@@ -1,7 +1,8 @@
 import * as getLogger from "loggy";
 import { getDB } from "@utils/db";
 import { INullableHashMap } from "@sb-types/Types";
-import { GuildMember } from "discord.js";
+import { GuildMember, GuildMemberRoleStore } from "discord.js";
+import { EventEmitter } from "events";
 
 export const DEFAULT_TABLE_NAME = "verify";
 
@@ -41,7 +42,7 @@ interface IVerifyData {
 	level: VerificationLevel;
 }
 
-export class VerifyDBController {
+export class VerifyDBController extends EventEmitter {
 	/**
 	 * Database table name
 	 */
@@ -79,6 +80,8 @@ export class VerifyDBController {
 	}
 
 	constructor(tableName = DEFAULT_TABLE_NAME) {
+		super();
+
 		this[TABLE_NAME] = tableName;
 		this[LOGGER] = getLogger(`Verify:DB{${tableName}}`);
 		this[INITIALIZED] = false;
@@ -183,6 +186,10 @@ export class VerifyDBController {
 		});
 
 		this._storeLocally(getLocalStorageKey(member), level);
+
+		if (member.guild.verificationLevel === level) {
+			this.emit("verified", member, level);
+		}
 	}
 
 	/**
@@ -198,6 +205,8 @@ export class VerifyDBController {
 		}).delete();
 
 		delete this[LOCAL_CACHE][getLocalStorageKey(member)];
+
+		this.emit("purged", member);
 	}
 }
 
